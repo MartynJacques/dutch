@@ -1,8 +1,17 @@
+"""
+    Small program to determine the profits using the dutch method of betting
+    on a football match.
+"""
+
 import sys
 
 class MatchedBet(object):
-    def __init__(self, odds, stakes, profits, returns, refunds,
+    """
+        Data structure to hold the contents of a bet.
+    """
+    def __init__(self, teams, odds, stakes, profits, returns, refunds,
                  total_returns, outlays):
+        self.teams = [teams[0], "Draw", teams[1]]
         self.odds = odds
         self.stakes = stakes
         self.profits = profits
@@ -12,23 +21,37 @@ class MatchedBet(object):
         self.outlays = outlays
 
     def __str__(self):
-        results = ["Home", "Draw", "Away"]
-        table = (
-            "Result \t Odds \t Stake \t Ret \t Ref \t TRet \t TOut \t Profit"
+        row_format = (
+            "{0:10} {1:>6} {2:>5} {3:>8} {4:>6} {5:>13} {6:>13} {7:>6}"
+        )
+        table = row_format.format(
+            "Result",
+            "Odds",
+            "Stake",
+            "Returns",
+            "Refund",
+            "Total Returns",
+            "Total Outlay",
+            "Profit"
         )
         for a in range(0, 3):
+            table += '\n'
             table += (
-                "\n{0} \t {1} \t {2} \t {3} \t {4} \t {5} \t {6} \t {7}"
+                row_format
             ).format(
-                results[a], self.odds[a], self.stakes[a], self.returns[a],
-                self.refunds[a], self.total_returns[a], self.outlays[a],
+                self.teams[a],
+                self.odds[a],
+                self.stakes[a],
+                self.returns[a],
+                self.refunds[a],
+                self.total_returns[a],
+                self.outlays[a],
                 self.profits[a]
             )
         return table
 
     def get_in_play_bet(self):
-        results = ["Home", "Draw", "Away"]
-        return results[self.refunds.index(0)]
+        return self.teams[self.refunds.index(0)]
 
 def get_difference(profit_list):
     sorted_list = sorted(profit_list, key=float)
@@ -53,7 +76,8 @@ def get_refund(index, stake_list):
             else:
                 return_value = 50
         return [0, return_value, return_value]
-    elif index == 1:
+
+    if index == 1:
         max_of_pre_match = max([stake_list[0], stake_list[2]])
         if stake_list[1] > 50 and stake_list[0] > 50 and stake_list[2] > 50:
             return_value = 50
@@ -67,7 +91,8 @@ def get_refund(index, stake_list):
             else:
                 return_value = 50
         return [return_value, 0, return_value]
-    else:
+
+    if index == 2:
         max_of_pre_match = max([stake_list[0], stake_list[1]])
         if stake_list[2] > 50 and stake_list[0] > 50 and stake_list[1] > 50:
             return_value = 50
@@ -83,7 +108,8 @@ def get_refund(index, stake_list):
         return [return_value, return_value, 0]
 
 def main():
-    odds = map(float, sys.argv[1:])
+    teams = [sys.argv[1], sys.argv[2]]
+    odds = map(float, sys.argv[3:])
     index = odds.index(max(odds))
 
     best_equal_bet = None
@@ -98,9 +124,9 @@ def main():
     best_away_win_profit = 0
     best_away_win_bet = None
 
-    for a in range(10,110):
-        for b in range(10,110):
-            for c in range(10,110):
+    for a in range(10, 110):
+        for b in range(10, 110):
+            for c in range(10, 110):
                 stake = [a, b, c]
                 returns = [stake[i] * odds[i] for i in range(len(stake))]
                 refund = get_refund(index, stake)
@@ -119,6 +145,7 @@ def main():
                     if (get_difference(overall_profit) <= 3
                             and sum(overall_profit) > best_equal_total_profit):
                         best_equal_bet = MatchedBet(
+                            teams,
                             odds,
                             stake,
                             overall_profit,
@@ -135,6 +162,7 @@ def main():
                                 and overall_profit[2] > 8):
                         best_home_win_profit = overall_profit[0]
                         best_home_win_bet = MatchedBet(
+                            teams,
                             odds,
                             stake,
                             overall_profit,
@@ -150,6 +178,7 @@ def main():
                                 and overall_profit[2] > 8):
                         best_draw_profit = overall_profit[1]
                         best_draw_bet = MatchedBet(
+                            teams,
                             odds,
                             stake,
                             overall_profit,
@@ -165,6 +194,7 @@ def main():
                                 and overall_profit[1] > 8):
                         best_away_win_profit = overall_profit[2]
                         best_away_win_bet = MatchedBet(
+                            teams,
                             odds,
                             stake,
                             overall_profit,
@@ -185,7 +215,6 @@ def main():
     print "\nBest draw"
     print best_draw_bet
     print "In play bet: {0}".format(best_draw_bet.get_in_play_bet())
-
 
     print "\nBest away win"
     print best_away_win_bet
