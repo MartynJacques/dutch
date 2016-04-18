@@ -57,6 +57,7 @@ class MatchedBet(object):
                 self.outlay,
                 self.profits[a]
             )
+        table += "\nIn play bet: {0}".format(self.get_in_play_bet())
         return table
 
     def get_in_play_bet(self):
@@ -135,19 +136,12 @@ class MatchedBet(object):
 
 def main():
     teams = [sys.argv[1], sys.argv[2]]
-    odds = map(float, sys.argv[3:])
+    odds = [float(x) for x in sys.argv[3:]]
 
-    best_equal_bet = None
-    best_equal_total_profit = 0
-
-    best_home_win_profit = 0
-    best_home_win_bet = None
-
-    best_draw_profit = 0
-    best_draw_bet = None
-
-    best_away_win_profit = 0
-    best_away_win_bet = None
+    best_equal_bet = MatchedBet(teams, odds, [1, 1, 1])
+    best_home_win_bet = MatchedBet(teams, odds, [1, 1, 1])
+    best_draw_bet = MatchedBet(teams, odds, [1, 1, 1])
+    best_away_win_bet = MatchedBet(teams, odds, [1, 1, 1])
 
     for a in range(10, 110):
         for b in range(10, 110):
@@ -157,46 +151,41 @@ def main():
                 if not this_bet.has_negative():
                     # Best equal profit
                     if (this_bet.get_difference() <= 3
-                            and this_bet.sum_of_profits() > best_equal_total_profit):
+                            and this_bet.sum_of_profits()
+                                > best_equal_bet.sum_of_profits()):
                         best_equal_bet = this_bet
-                        best_equal_total_profit = this_bet.sum_of_profits()
 
                     # Home Win
-                    if (this_bet.home_win_profit() > best_home_win_profit
-                            and this_bet.draw_profit() > 8
-                                and this_bet.away_win_profit() > 8):
-                        best_home_win_profit = this_bet.home_win_profit()
+                    if (this_bet.home_win_profit()
+                            > best_home_win_bet.home_win_profit()
+                                and this_bet.draw_profit() > 8
+                                    and this_bet.away_win_profit() > 8):
                         best_home_win_bet = this_bet
 
                     # Draw
-                    if (this_bet.draw_profit() > best_draw_profit
+                    if (this_bet.draw_profit() > best_draw_bet.draw_profit()
                             and this_bet.home_win_profit() > 8
                                 and this_bet.away_win_profit() > 8):
-                        best_draw_profit = this_bet.draw_profit()
                         best_draw_bet = this_bet
 
                     # Away Win
-                    if (this_bet.away_win_profit() > best_away_win_profit
-                            and this_bet.home_win_profit() > 8
-                                and this_bet.draw_profit() > 8):
-                        best_away_win_profit = this_bet.away_win_profit()
+                    if (this_bet.away_win_profit()
+                            > best_away_win_bet.away_win_profit()
+                                and this_bet.home_win_profit() > 8
+                                    and this_bet.draw_profit() > 8):
                         best_away_win_bet = this_bet
 
     print "\nBest equal profit"
     print best_equal_bet
-    print "In play bet: {0}".format(best_equal_bet.get_in_play_bet())
 
     print "\nBest home win"
     print best_home_win_bet
-    print "In play bet: {0}".format(best_home_win_bet.get_in_play_bet())
 
     print "\nBest draw"
     print best_draw_bet
-    print "In play bet: {0}".format(best_draw_bet.get_in_play_bet())
 
     print "\nBest away win"
     print best_away_win_bet
-    print "In play bet: {0}".format(best_away_win_bet.get_in_play_bet())
 
 if __name__ == "__main__":
     main()
