@@ -62,6 +62,14 @@ class MatchedBet(object):
     def get_in_play_bet(self):
         return self.teams[self.refunds.index(0)]
 
+    def get_difference(self):
+        sorted_list = sorted(self.profits, key=float)
+        return (
+            (sorted_list[2] - sorted_list[1])
+            + (sorted_list[2] - sorted_list[0])
+            + (sorted_list[1] - sorted_list[0])
+        )
+
     def get_refund(self, index, stake_list):
         if index == 0:
             max_of_pre_match = max([stake_list[1], stake_list[2]])
@@ -108,13 +116,22 @@ class MatchedBet(object):
                     return_value = 50
             return [return_value, return_value, 0]
 
-def get_difference(profit_list):
-    sorted_list = sorted(profit_list, key=float)
-    return (
-        (sorted_list[2] - sorted_list[1])
-        + (sorted_list[2] - sorted_list[0])
-        + (sorted_list[1] - sorted_list[0])
-    )
+    def has_negative(self):
+        if sum(1 for n in self.profits if n < 0) == 0:
+            return False
+        return True
+
+    def sum_of_profits(self):
+        return sum(self.profits)
+
+    def home_win_profit(self):
+        return self.profits[0]
+
+    def draw_profit(self):
+        return self.profits[1]
+
+    def away_win_profit(self):
+        return self.profits[2]
 
 def main():
     teams = [sys.argv[1], sys.argv[2]]
@@ -137,32 +154,32 @@ def main():
             for c in range(10, 110):
                 this_bet = MatchedBet(teams, odds, [a, b, c])
 
-                if sum(1 for n in this_bet.profits if n < 0) == 0:
+                if not this_bet.has_negative():
                     # Best equal profit
-                    if (get_difference(this_bet.profits) <= 3
-                            and sum(this_bet.profits) > best_equal_total_profit):
+                    if (this_bet.get_difference() <= 3
+                            and this_bet.sum_of_profits() > best_equal_total_profit):
                         best_equal_bet = this_bet
-                        best_equal_total_profit = sum(this_bet.profits)
+                        best_equal_total_profit = this_bet.sum_of_profits()
 
                     # Home Win
-                    if (this_bet.profits[0] > best_home_win_profit
-                            and this_bet.profits[1] > 8
-                                and this_bet.profits[2] > 8):
-                        best_home_win_profit = this_bet.profits[0]
+                    if (this_bet.home_win_profit() > best_home_win_profit
+                            and this_bet.draw_profit() > 8
+                                and this_bet.away_win_profit() > 8):
+                        best_home_win_profit = this_bet.home_win_profit()
                         best_home_win_bet = this_bet
 
                     # Draw
-                    if (this_bet.profits[1] > best_draw_profit
-                            and this_bet.profits[0] > 8
-                                and this_bet.profits[2] > 8):
-                        best_draw_profit = this_bet.profits[1]
+                    if (this_bet.draw_profit() > best_draw_profit
+                            and this_bet.home_win_profit() > 8
+                                and this_bet.away_win_profit() > 8):
+                        best_draw_profit = this_bet.draw_profit()
                         best_draw_bet = this_bet
 
                     # Away Win
-                    if (this_bet.profits[2] > best_away_win_profit
-                            and this_bet.profits[0] > 8
-                                and this_bet.profits[1] > 8):
-                        best_away_win_profit = this_bet.profits[2]
+                    if (this_bet.away_win_profit() > best_away_win_profit
+                            and this_bet.home_win_profit() > 8
+                                and this_bet.draw_profit() > 8):
+                        best_away_win_profit = this_bet.away_win_profit()
                         best_away_win_bet = this_bet
 
     print "\nBest equal profit"
