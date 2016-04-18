@@ -1,5 +1,27 @@
 import sys
 
+class MatchedBet(object):
+    """docstring for MatchedBet"""
+    def __init__(self, odds, stakes, profits, returns, refunds,
+                 total_returns, outlays):
+        self.odds = odds
+        self.stakes = stakes
+        self.profits = profits
+        self.returns = returns
+        self.refunds = refunds
+        self.total_returns = total_returns
+        self.outlays = outlays
+
+    def __str__(self):
+        results = ["Home", "Draw", "Away"]
+        string = "Result \t Odds \t Stake \t Ret \t Ref \t TRet \t TOut \t Profit"
+        for a in range(0, 3):
+            string+= "\n{0} \t {1} \t {2} \t {3} \t {4} \t {5} \t {6} \t {7}".format(
+                results[a], self.odds[a], self.stakes[a], self.returns[a], self.refunds[a], self.total_returns[a], self.outlays[a], self.profits[a]
+            )
+        return string
+
+
 def map_to_result(index):
     if index == 0:
         return "Home"
@@ -93,37 +115,17 @@ def main():
     odds = map(float, sys.argv[1:])
     index = odds.index(max(odds))
 
-    best_equal_stake = []
-    best_equal_profit = []
-    best_equal_returns = []
-    best_equal_refund = []
-    best_equal_total_returns = []
-    best_equal_total_outlay = []
+    best_equal_bet = None
     best_equal_total_profit = 0
 
     best_home_win_profit = 0
-    best_home_win_stake = []
-    best_home_win_profit_list = []
-    best_home_win_returns = []
-    best_home_win_refund = []
-    best_home_win_total_returns = []
-    best_home_win_total_outlay = []
+    best_home_win_bet = None
 
     best_draw_profit = 0
-    best_draw_stake = []
-    best_draw_profit_list = []
-    best_draw_returns = []
-    best_draw_refund = []
-    best_draw_total_returns = []
-    best_draw_total_outlay = []
+    best_draw_bet = None
 
     best_away_win_profit = 0
-    best_away_win_stake = []
-    best_away_win_profit_list = []
-    best_away_win_returns = []
-    best_away_win_refund = []
-    best_away_win_total_returns = []
-    best_away_win_total_outlay = []
+    best_away_win_bet = None
 
     for a in range(10,110):
         for b in range(10,110):
@@ -147,79 +149,67 @@ def main():
                 if not_negative(overall_profit):
                     difference = get_difference(overall_profit)
                     if difference <= 3 and sum(overall_profit) > best_equal_total_profit:
-                        best_equal_stake = stake
-                        best_equal_profit = overall_profit
-                        best_equal_returns = returns
-                        best_equal_refund = refund
-                        best_equal_total_returns = total_returns
-                        best_equal_total_outlay = total_outlay
-                        best_equal_total_profit = sum(best_equal_profit)
+                        best_equal_bet = MatchedBet(
+                            odds,
+                            stake,
+                            overall_profit,
+                            returns,
+                            refund,
+                            total_returns,
+                            total_outlay,
+                        )
+                        best_equal_total_profit = sum(overall_profit)
 
                     # Home Win
                     if overall_profit[0] > best_home_win_profit and overall_profit[1] > 8 and overall_profit[2] > 8:
                         best_home_win_profit = overall_profit[0]
-                        best_home_win_stake = stake
-                        best_home_win_profit_list = overall_profit
-                        best_home_win_returns = returns
-                        best_home_win_refund = refund
-                        best_home_win_total_returns = total_returns
-                        best_home_win_total_outlay = total_outlay
+                        best_home_win_bet = MatchedBet(
+                            odds,
+                            stake,
+                            overall_profit,
+                            returns,
+                            refund,
+                            total_returns,
+                            total_outlay,
+                        )
 
                     # Draw
                     if overall_profit[1] > best_draw_profit and overall_profit[0] > 8 and overall_profit[2] > 8:
                         best_draw_profit = overall_profit[1]
-                        best_draw_stake = stake
-                        best_draw_profit_list = overall_profit
-                        best_draw_returns = returns
-                        best_draw_refund = refund
-                        best_draw_total_returns = total_returns
-                        best_draw_total_outlay = total_outlay
+                        best_draw_bet = MatchedBet(
+                            odds,
+                            stake,
+                            overall_profit,
+                            returns,
+                            refund,
+                            total_returns,
+                            total_outlay,
+                        )
 
                     # Away Win
                     if overall_profit[2] > best_away_win_profit and overall_profit[0] > 8 and overall_profit[1] > 8:
                         best_away_win_profit = overall_profit[2]
-                        best_away_win_stake = stake
-                        best_away_win_profit_list = overall_profit
-                        best_away_win_returns = returns
-                        best_away_win_refund = refund
-                        best_away_win_total_returns = total_returns
-                        best_away_win_total_outlay = total_outlay
+                        best_away_win_bet = MatchedBet(
+                            odds,
+                            stake,
+                            overall_profit,
+                            returns,
+                            refund,
+                            total_returns,
+                            total_outlay,
+                        )
 
     print "\nBest equal profit"
-    print_table(odds,
-                best_equal_stake,
-                best_equal_returns,
-                best_equal_refund,
-                best_equal_total_returns,
-                best_equal_total_outlay,
-                best_equal_profit)
+    print best_equal_bet
 
     print "\nBest home win"
-    print_table(odds,
-                best_home_win_stake,
-                best_home_win_returns,
-                best_home_win_refund,
-                best_home_win_total_returns,
-                best_home_win_total_outlay,
-                best_home_win_profit_list)
+    print best_home_win_bet
 
     print "\nBest draw"
-    print_table(odds,
-                best_draw_stake,
-                best_draw_returns,
-                best_draw_refund,
-                best_draw_total_returns,
-                best_draw_total_outlay,
-                best_draw_profit_list)
+    print best_draw_bet
 
     print "\nBest away win"
-    print_table(odds,
-                best_away_win_stake,
-                best_away_win_returns,
-                best_away_win_refund,
-                best_away_win_total_returns,
-                best_away_win_total_outlay,
-                best_away_win_profit_list)
+    print best_away_win_bet
 
 
 if __name__ == "__main__":
