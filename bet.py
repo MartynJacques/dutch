@@ -9,16 +9,25 @@ class MatchedBet(object):
     """
         Data structure to hold the contents of a bet.
     """
-    def __init__(self, teams, odds, stakes, profits, returns, refunds,
-                 total_returns, outlays):
+    def __init__(self, teams, odds, stakes):
         self.teams = [teams[0], "Draw", teams[1]]
         self.odds = odds
         self.stakes = stakes
-        self.profits = profits
-        self.returns = returns
-        self.refunds = refunds
-        self.total_returns = total_returns
-        self.outlays = outlays
+        self.returns = [
+            self.stakes[i] * self.odds[i] for i in range(len(stakes))
+        ]
+        self.refunds = self.get_refund(
+            self.odds.index(max(self.odds)), self.stakes
+        )
+        self.total_returns = [
+            self.returns[i] + self.refunds[i] for i in range(len(self.refunds))
+        ]
+        self.outlay = sum(self.stakes)
+        self.profits = [
+            self.total_returns[i] - self.outlay for i in range(
+                len(self.total_returns)
+            )
+        ]
 
     def __str__(self):
         row_format = (
@@ -45,13 +54,59 @@ class MatchedBet(object):
                 self.returns[a],
                 self.refunds[a],
                 self.total_returns[a],
-                self.outlays[a],
+                self.outlay,
                 self.profits[a]
             )
         return table
 
     def get_in_play_bet(self):
         return self.teams[self.refunds.index(0)]
+
+    def get_refund(self, index, stake_list):
+        if index == 0:
+            max_of_pre_match = max([stake_list[1], stake_list[2]])
+            if stake_list[0] > 50 and stake_list[1] > 50 and stake_list[2] > 50:
+                return_value = 50
+            elif stake_list[0] < 50 and max_of_pre_match > stake_list[0]:
+                return_value = stake_list[0]
+            elif stake_list[0] < 50 and max_of_pre_match < stake_list[0]:
+                return_value = max_of_pre_match
+            else:
+                if max_of_pre_match < 50:
+                    return_value = max_of_pre_match
+                else:
+                    return_value = 50
+            return [0, return_value, return_value]
+
+        if index == 1:
+            max_of_pre_match = max([stake_list[0], stake_list[2]])
+            if stake_list[1] > 50 and stake_list[0] > 50 and stake_list[2] > 50:
+                return_value = 50
+            elif stake_list[1] < 50 and max_of_pre_match > stake_list[1]:
+                return_value = stake_list[1]
+            elif stake_list[1] < 50 and max_of_pre_match < stake_list[1]:
+                return_value = max_of_pre_match
+            else:
+                if max_of_pre_match < 50:
+                    return_value = max_of_pre_match
+                else:
+                    return_value = 50
+            return [return_value, 0, return_value]
+
+        if index == 2:
+            max_of_pre_match = max([stake_list[0], stake_list[1]])
+            if stake_list[2] > 50 and stake_list[0] > 50 and stake_list[1] > 50:
+                return_value = 50
+            elif stake_list[2] < 50 and max_of_pre_match > stake_list[2]:
+                return_value = stake_list[1]
+            elif stake_list[2] < 50 and max_of_pre_match < stake_list[2]:
+                return_value = max_of_pre_match
+            else:
+                if max_of_pre_match < 50:
+                    return_value = max_of_pre_match
+                else:
+                    return_value = 50
+            return [return_value, return_value, 0]
 
 def get_difference(profit_list):
     sorted_list = sorted(profit_list, key=float)
@@ -61,56 +116,9 @@ def get_difference(profit_list):
         + (sorted_list[1] - sorted_list[0])
     )
 
-def get_refund(index, stake_list):
-    if index == 0:
-        max_of_pre_match = max([stake_list[1], stake_list[2]])
-        if stake_list[0] > 50 and stake_list[1] > 50 and stake_list[2] > 50:
-            return_value = 50
-        elif stake_list[0] < 50 and max_of_pre_match > stake_list[0]:
-            return_value = stake_list[0]
-        elif stake_list[0] < 50 and max_of_pre_match < stake_list[0]:
-            return_value = max_of_pre_match
-        else:
-            if max_of_pre_match < 50:
-                return_value = max_of_pre_match
-            else:
-                return_value = 50
-        return [0, return_value, return_value]
-
-    if index == 1:
-        max_of_pre_match = max([stake_list[0], stake_list[2]])
-        if stake_list[1] > 50 and stake_list[0] > 50 and stake_list[2] > 50:
-            return_value = 50
-        elif stake_list[1] < 50 and max_of_pre_match > stake_list[1]:
-            return_value = stake_list[1]
-        elif stake_list[1] < 50 and max_of_pre_match < stake_list[1]:
-            return_value = max_of_pre_match
-        else:
-            if max_of_pre_match < 50:
-                return_value = max_of_pre_match
-            else:
-                return_value = 50
-        return [return_value, 0, return_value]
-
-    if index == 2:
-        max_of_pre_match = max([stake_list[0], stake_list[1]])
-        if stake_list[2] > 50 and stake_list[0] > 50 and stake_list[1] > 50:
-            return_value = 50
-        elif stake_list[2] < 50 and max_of_pre_match > stake_list[2]:
-            return_value = stake_list[1]
-        elif stake_list[2] < 50 and max_of_pre_match < stake_list[2]:
-            return_value = max_of_pre_match
-        else:
-            if max_of_pre_match < 50:
-                return_value = max_of_pre_match
-            else:
-                return_value = 50
-        return [return_value, return_value, 0]
-
 def main():
     teams = [sys.argv[1], sys.argv[2]]
     odds = map(float, sys.argv[3:])
-    index = odds.index(max(odds))
 
     best_equal_bet = None
     best_equal_total_profit = 0
@@ -127,82 +135,35 @@ def main():
     for a in range(10, 110):
         for b in range(10, 110):
             for c in range(10, 110):
-                stake = [a, b, c]
-                returns = [stake[i] * odds[i] for i in range(len(stake))]
-                refund = get_refund(index, stake)
-                total_returns = [
-                    returns[i] + refund[i] for i in range(len(refund))
-                ]
-                total_outlay = [sum(stake), sum(stake), sum(stake)]
-                overall_profit = [
-                    total_returns[i] - total_outlay[i] for i in range(
-                        len(total_outlay)
-                    )
-                ]
+                this_bet = MatchedBet(teams, odds, [a, b, c])
 
-                if sum(1 for n in overall_profit if n < 0) == 0:
+                if sum(1 for n in this_bet.profits if n < 0) == 0:
                     # Best equal profit
-                    if (get_difference(overall_profit) <= 3
-                            and sum(overall_profit) > best_equal_total_profit):
-                        best_equal_bet = MatchedBet(
-                            teams,
-                            odds,
-                            stake,
-                            overall_profit,
-                            returns,
-                            refund,
-                            total_returns,
-                            total_outlay,
-                        )
-                        best_equal_total_profit = sum(overall_profit)
+                    if (get_difference(this_bet.profits) <= 3
+                            and sum(this_bet.profits) > best_equal_total_profit):
+                        best_equal_bet = this_bet
+                        best_equal_total_profit = sum(this_bet.profits)
 
                     # Home Win
-                    if (overall_profit[0] > best_home_win_profit
-                            and overall_profit[1] > 8
-                                and overall_profit[2] > 8):
-                        best_home_win_profit = overall_profit[0]
-                        best_home_win_bet = MatchedBet(
-                            teams,
-                            odds,
-                            stake,
-                            overall_profit,
-                            returns,
-                            refund,
-                            total_returns,
-                            total_outlay,
-                        )
+                    if (this_bet.profits[0] > best_home_win_profit
+                            and this_bet.profits[1] > 8
+                                and this_bet.profits[2] > 8):
+                        best_home_win_profit = this_bet.profits[0]
+                        best_home_win_bet = this_bet
 
                     # Draw
-                    if (overall_profit[1] > best_draw_profit
-                            and overall_profit[0] > 8
-                                and overall_profit[2] > 8):
-                        best_draw_profit = overall_profit[1]
-                        best_draw_bet = MatchedBet(
-                            teams,
-                            odds,
-                            stake,
-                            overall_profit,
-                            returns,
-                            refund,
-                            total_returns,
-                            total_outlay,
-                        )
+                    if (this_bet.profits[1] > best_draw_profit
+                            and this_bet.profits[0] > 8
+                                and this_bet.profits[2] > 8):
+                        best_draw_profit = this_bet.profits[1]
+                        best_draw_bet = this_bet
 
                     # Away Win
-                    if (overall_profit[2] > best_away_win_profit
-                            and overall_profit[0] > 8
-                                and overall_profit[1] > 8):
-                        best_away_win_profit = overall_profit[2]
-                        best_away_win_bet = MatchedBet(
-                            teams,
-                            odds,
-                            stake,
-                            overall_profit,
-                            returns,
-                            refund,
-                            total_returns,
-                            total_outlay,
-                        )
+                    if (this_bet.profits[2] > best_away_win_profit
+                            and this_bet.profits[0] > 8
+                                and this_bet.profits[1] > 8):
+                        best_away_win_profit = this_bet.profits[2]
+                        best_away_win_bet = this_bet
 
     print "\nBest equal profit"
     print best_equal_bet
