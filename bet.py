@@ -13,9 +13,13 @@ class MatchedBet(object):
 
     def __str__(self):
         results = ["Home", "Draw", "Away"]
-        table = "Result \t Odds \t Stake \t Ret \t Ref \t TRet \t TOut \t Profit"
+        table = (
+            "Result \t Odds \t Stake \t Ret \t Ref \t TRet \t TOut \t Profit"
+        )
         for a in range(0, 3):
-            table += "\n{0} \t {1} \t {2} \t {3} \t {4} \t {5} \t {6} \t {7}".format(
+            table += (
+                "\n{0} \t {1} \t {2} \t {3} \t {4} \t {5} \t {6} \t {7}"
+            ).format(
                 results[a], self.odds[a], self.stakes[a], self.returns[a],
                 self.refunds[a], self.total_returns[a], self.outlays[a],
                 self.profits[a]
