@@ -13,9 +13,7 @@ class MatchedBet(object):
         self.teams = [teams[0], "Draw", teams[1]]
         self.odds = odds
         self.stakes = stakes
-        self.bet_365_pre_match_bet_index = self.teams.index(
-            bet_365_pre_match_bet
-        )
+        self.bet_365_pre_match_bet = bet_365_pre_match_bet
         self.returns = [
             self.stakes[i] * self.odds[i] for i in range(len(stakes))
         ]
@@ -66,21 +64,26 @@ class MatchedBet(object):
         when = ["Never", "Never", "Never"]
         when[self.get_in_play_bet_index()] = "Bet365 in play"
         when[self.get_other_pre_match_bet()] = "Other pre-match"
-        when[self.bet_365_pre_match_bet_index] = "Bet365 pre-match"
+        when[self.get_bet_365_pre_match_bet_index()] = "Bet365 pre-match"
         return when
 
     def get_in_play_bet_index(self):
         return self.odds.index(max(self.odds))
 
+    def get_bet_365_pre_match_bet_index(self):
+        return self.teams.index(
+            self.bet_365_pre_match_bet
+        )
+
     def get_other_pre_match_bet(self):
         for x in range(0,3):
             if (x != self.get_in_play_bet_index()
-                    and x != self.bet_365_pre_match_bet_index):
+                    and x != self.get_bet_365_pre_match_bet_index()):
                 return x
 
     def get_refund(self):
         in_play_index = self.get_in_play_bet_index()
-        bet_365_pre_match_stake = self.stakes[self.bet_365_pre_match_bet_index]
+        bet_365_pre_match_stake = self.stakes[self.get_bet_365_pre_match_bet_index()]
         in_play_stake = self.stakes[in_play_index]
 
         if bet_365_pre_match_stake > 50 and in_play_stake > 50:
