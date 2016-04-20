@@ -83,7 +83,9 @@ class MatchedBet(object):
 
     def get_refund(self):
         in_play_index = self.get_in_play_bet_index()
-        bet_365_pre_match_stake = self.stakes[self.get_bet_365_pre_match_bet_index()]
+        bet_365_pre_match_stake = self.stakes[
+            self.get_bet_365_pre_match_bet_index()
+        ]
         in_play_stake = self.stakes[in_play_index]
 
         if bet_365_pre_match_stake > 50 and in_play_stake > 50:
@@ -139,10 +141,18 @@ def main():
         exit(1)
 
     # Initialise the bets
-    best_equal_bet = MatchedBet(teams, odds, [1, 1, 1], bet_365_pre_match_bet)
-    best_home_win_bet = MatchedBet(teams, odds, [1, 1, 1], bet_365_pre_match_bet)
-    best_draw_bet = MatchedBet(teams, odds, [1, 1, 1], bet_365_pre_match_bet)
-    best_away_win_bet = MatchedBet(teams, odds, [1, 1, 1], bet_365_pre_match_bet)
+    best_equal_bet = MatchedBet(
+        teams, odds, [1, 1, 1], bet_365_pre_match_bet
+    )
+    best_home_win_bet = MatchedBet(
+        teams, odds, [1, 1, 1], bet_365_pre_match_bet
+    )
+    best_draw_bet = MatchedBet(
+        teams, odds, [1, 1, 1], bet_365_pre_match_bet
+    )
+    best_away_win_bet = MatchedBet(
+        teams, odds, [1, 1, 1], bet_365_pre_match_bet
+    )
 
     for a in range(10, 110):
         for b in range(10, 110):
