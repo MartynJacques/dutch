@@ -62,14 +62,6 @@ class MatchedBet(object):
             )
         return table
 
-    def get_difference(self):
-        sorted_list = sorted(self.profits, key=float)
-        return (
-            (sorted_list[2] - sorted_list[1])
-            + (sorted_list[2] - sorted_list[0])
-            + (sorted_list[1] - sorted_list[0])
-        )
-
     def get_when(self):
         when = ["Never", "Never", "Never"]
         when[self.get_in_play_bet_index()] = "Bet365 in play"
@@ -119,6 +111,17 @@ class MatchedBet(object):
     def away_win_profit(self):
         return self.profits[2]
 
+    def has_equal_returns(self):
+        sorted_list = sorted(self.profits, key=float)
+        difference = (
+            (sorted_list[2] - sorted_list[1])
+            + (sorted_list[2] - sorted_list[0])
+            + (sorted_list[1] - sorted_list[0])
+        )
+        if difference < 3:
+            return True
+        return False
+
 def main():
     try:
         teams = [sys.argv[1], sys.argv[2]]
@@ -150,7 +153,7 @@ def main():
 
                 if not this_bet.has_negative():
                     # Best equal profit
-                    if (this_bet.get_difference() <= 2
+                    if (this_bet.has_equal_returns()
                             and this_bet.sum_of_profits()
                                 > best_equal_bet.sum_of_profits()):
                         best_equal_bet = this_bet
