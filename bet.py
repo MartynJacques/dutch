@@ -91,7 +91,7 @@ class MatchedBet(object):
         if bet_365_pre_match_stake > 50 and in_play_stake > 50:
             refund_value = 50
         else:
-            refund_value = min([bet_365_pre_match_stake, in_play_stake])
+            refund_value = min(bet_365_pre_match_stake, in_play_stake)
 
         refund_list = [0, 0, 0]
         for i in range(0,3):
